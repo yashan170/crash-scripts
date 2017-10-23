@@ -1,0 +1,36 @@
+#!/usr/bin/env python2.7
+import argparse
+import json
+import csv
+import sys
+
+EXTRA_PATH = "/data/bff-results/bff/results/crashers/%s/%s"
+
+def main(args):
+  truths = {}
+  truths["name"] = args.name
+  truths["labels"] = []
+  reader = csv.reader(open(args.groundtruth, 'r'))
+  for i in reader:
+    status = i[1]
+    path = i[3]
+    vfixes = i[8]
+    print status
+    if status == "NORMAL":
+      fixes = [ i.split(":")[0] for i in vfixes.split(" ")]
+      realpath = args.prefixdir + path.replace(EXTRA_PATH % (args.name, args.name), "")
+      truths["labels"].append((realpath, fixes))
+
+  output = open(args.outputfile, 'w')
+  json.dump(truths, output)
+  output.close()
+  return 0
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser("csvtool")
+  parser.add_argument("name")
+  parser.add_argument("groundtruth")
+  parser.add_argument("outputfile")
+  parser.add_argument("prefixdir")
+  args = parser.parse_args()
+  sys.exit(main(args))

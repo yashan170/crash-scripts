@@ -1,0 +1,48 @@
+#!/usr/bin/env python2.7
+import itertools
+import argparse
+import json
+import sys
+
+def do_compare(A, B):
+  """
+  Evaluate how many times an assignment in A
+  produces the same result as an assignment in B.
+  Returns a value between 0 and 1.
+  """
+  mapping_A = {}
+  for (elem,cluster) in A:
+    mapping_A[elem] = set(cluster)
+  mapping_B = {}
+  for (elem,cluster) in B:
+    mapping_B[elem] = set(cluster)
+
+  assert mapping_A.keys() == mapping_B.keys()
+  eps = 1.0/len(mapping_A.keys())
+  res = 1.0
+
+  for k,v in mapping_A.iteritems():
+    if not bool(mapping_B[k].intersection(v)):
+      res = res - eps
+
+  return res
+
+def main(args):
+  clusters = []
+
+  for i in args.clusters:
+    clusters.append(json.load(open(i, 'r')))
+
+  if len(clusters) < 2:
+    print "WARNING! This only makes sense with more than 1 cluster"
+
+  for (A,B) in itertools.combinations(clusters, 2):
+    print "%s,%s,%.4f" % (A["name"], B["name"], do_compare(A["labels"],B["labels"]))
+
+  return 0
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser("analyze_clusters")
+  parser.add_argument("clusters", help="Clusters in JSON format", nargs='+')
+  args = parser.parse_args()
+  sys.exit(main(args)) 
