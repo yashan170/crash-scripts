@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from multiprocessing import Pool
@@ -6,12 +6,14 @@ import tempfile
 import numpy as np
 import subprocess
 import argparse
+import json
 import sys
 import os
 
 COMMAND = 'bash -c "cat %s | ASAN_OPTIONS=symbolize=false,log_path=stdout gdb -batch -ex "run" -ex "bt" %s"'
 LLDB_COMMAND = "./debugger %s %s"
-AFL_COMMAND = 'bash -c "cat %s | afl-showmap -q -o %s -- %s"'
+#AFL_COMMAND = 'bash -c "cat %s | afl-showmap -q -o %s -- %s"'
+AFL_COMMAND = 'afl-showmap -q -o %s -- %s -d %s'
 
 class GetStack(object):
   def __init__(self, p):
@@ -26,7 +28,7 @@ class GetMap(object):
     f = tempfile.NamedTemporaryFile(delete=False)
     nm = f.name
     f.close()
-    subprocess.call(AFL_COMMAND % (x, nm, self.p), shell=True)
+    subprocess.call(AFL_COMMAND % (nm, self.p, x), shell=True)
     u = open(nm, 'r')
     buf = u.read()
     u.close()
@@ -34,9 +36,13 @@ class GetMap(object):
     return (x,buf)
 
 def main(args):
+  files = []
+  injs = json.load(open(args.files, 'r'))
+  for i in injs["labels"]:
+    files.append(i[0])
   p = Pool(16)
   if args.get_stacks:
-    stacks = p.map(GetStack(args.program), args.files)
+    stacks = p.map(GetStack(args.program), files)
     prunedstacks = []
     for (infile,s) in stacks:
       newstack = []
@@ -63,7 +69,7 @@ def main(args):
         print u
       print ""
     return 0
-  maps = p.map(GetMap(args.program), args.files)
+  maps = p.map(GetMap(args.program), files)
   maps_as_dicts = []
   for (infile,m) in maps:
     dmap = {}
@@ -82,6 +88,7 @@ def main(args):
       if m.has_key(k) == False:
         m[k] = 0
   vecs = [ [ m[i] for i in m.keys() ] for (a,m) in maps_as_dicts ]
+  """
   # Make them into vectors. 
   na = np.array(vecs)
   # Run PCA?
@@ -92,6 +99,7 @@ def main(args):
   kmeans = KMeans(n_clusters=args.clusters, random_state=0).fit(na)
   for i,c in enumerate(kmeans.labels_):
     print "%s|%s" % (maps_as_dicts[i][0], c)
+  """
 
   return 0
 
@@ -102,6 +110,6 @@ if __name__ == '__main__':
   parser.add_argument('--get-stacks', type=bool, default=False)
   parser.add_argument('--pca_components', type=int, default=100)
   parser.add_argument("program", type=str)
-  parser.add_argument("files", nargs='+')
+  parser.add_argument("files", type=str, help="JSON file specifying input files")
   args = parser.parse_args()
   sys.exit(main(args))
