@@ -1,19 +1,31 @@
 #!/usr/bin/env python2
 from sklearn.cluster import KMeans
+from sklearn.cluster import SpectralClustering
 import numpy as np
 import argparse
 import json
 import sys
 
-def cluster_kmeans(vecs):
+def cluster_kmeans(args, index_to_file, vecs):
   na = np.array(vecs)
-  kmeans = KMeans(n_clusters=args.clusters, random_state=0).fit(na)
+  kmeans = KMeans(n_clusters=args.clusters, n_jobs=-1).fit(na)
   labels = []
   for i,c in enumerate(kmeans.labels_):
     labels.append((str(index_to_file[i]), int(c)))
   results = {}
   results['labels'] = labels
   results['name'] = 'kmeans'
+  return results 
+
+def cluster_spectral(args, index_to_file, vecs):
+  na = np.array(vecs)
+  spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1).fit(na)
+  labels = []
+  for i,c in enumerate(spec.labels_):
+    labels.append((str(index_to_file[i]), int(c)))
+  results = {}
+  results['labels'] = labels
+  results['name'] = 'spectral'
   return results 
 
 def main(args):
@@ -57,11 +69,13 @@ def main(args):
   cluster_meth = None
   if args.cluster_method == 'kmeans':
     cluster_meth = cluster_kmeans
+  elif args.cluster_method == 'spectral':
+    cluster_meth = cluster_spectral
   else:
     print "Unknown cluster method %s" % args.cluster_method
     return 1
 
-  results = cluster_meth(vecs)
+  results = cluster_meth(args, index_to_file, vecs)
   # Write the results of this clustering out to a file. 
   out = open(args.outfile, 'w')
   json.dump(results, out)
@@ -75,7 +89,7 @@ if __name__ == '__main__':
   parser.add_argument('files', nargs='+')
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
-  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans'])
+  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral'])
   args = parser.parse_args()
   sys.exit(main(args))
 

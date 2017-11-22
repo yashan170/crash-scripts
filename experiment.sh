@@ -24,9 +24,13 @@ echo "Extracting vectors"
 # Run the vector extract commands through GNU parallel. 
 parallel --bar < $DIR/$NAME'-commands'
 
-echo "Running KMeans clustering"
 # Run clustering on the extracted vectors. 
+echo "Running KMeans clustering"
 $DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DATAPATH/$NAME'-kmeans.json' --name=kmeans $DATAPATH/$NAME'-vectors/'*.json
+
+#echo "Running Spectral clustering"
+#$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DATAPATH/$NAME'-spectral.json' --name=spectral $DATAPATH/$NAME'-vectors/'*.json
 
 # Compare the produced cluster(s) with ground truth and report. 
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-kmeans.json'
+#$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-spectral.json'
