@@ -1,0 +1,27 @@
+#!/usr/bin/env python2.7
+import argparse
+import json
+import sys
+import os
+
+def main(args):
+  inf = json.load(open(args.input, 'r'))
+  u = inf["labels"]
+  l = []
+  for i in u:
+    outname = os.path.basename(i[0])
+    # Have the generated command check to see if the result json is present, if it is, then
+    # we can skip feature extraction. 
+    finalpath = args.output + "/" + outname + ".json"
+    l.append("[ -f " + finalpath + "] || " + args.command + " " + i[0] + " > " + finalpath)
+  for i in l:
+    print i
+  return 0
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser("stupid")
+  parser.add_argument("command")
+  parser.add_argument("input")
+  parser.add_argument("output")
+  args = parser.parse_args()
+  sys.exit(main(args))

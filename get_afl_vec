@@ -1,0 +1,46 @@
+#!/usr/bin/env python2.7
+import tempfile
+import numpy as np
+import subprocess
+import argparse
+import json
+import sys
+import os
+
+AFL_COMMAND = 'afl-showmap -t 2000000 -m 15032123396 -q -o %s -- %s %s'
+
+class GetMap(object):
+  def __init__(self, p):
+    self.p = p
+  def __call__(self, x):
+    f = tempfile.NamedTemporaryFile(delete=False)
+    nm = f.name
+    f.close()
+    subprocess.call(AFL_COMMAND % (nm, self.p, x), shell=True)
+    u = open(nm, 'r')
+    buf = u.read()
+    u.close()
+    os.remove(nm)
+    return (x,buf)
+
+def main(args):
+  infile,m = GetMap(args.program)(args.file)
+  maps_as_dicts = []
+  dmap = {}
+  for l in m.split("\n"):
+    lu = l.strip().rstrip()
+    if len(lu) > 0:
+      a,b = lu.split(":")
+      dmap[str(a)] = int(b)
+  umap = {}
+  umap['file'] = args.file
+  umap['tuples'] = dmap
+  print json.dumps(umap)
+  return 0
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser("getstacks")
+  parser.add_argument("program", type=str)
+  parser.add_argument("file", type=str, help="input file")
+  args = parser.parse_args()
+  sys.exit(main(args))
