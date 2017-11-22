@@ -9,8 +9,16 @@ def main(args):
   # Read in all the vector files as dictionaries. 
   
   map_dicts = []
+  file_to_index = {}
+  index_to_file = {}
+  i = 0
   for f in args.files:
-    map_dicts.append(json.load(open(f, 'r')))
+    r = json.load(open(f, 'r'))
+    map_dicts.append(r['tuples'])
+    file_to_index[r['file']] = i
+    index_to_file[i] = r['file']
+    i = i + 1
+
   # Pad out all the dicts in map.dicts to have the same key set.
   total_key_set = set()
   for m in map_dicts:
@@ -28,18 +36,32 @@ def main(args):
     for k in total_key_set:
       vec.append(m[k])
     vecs.append(vec)
+  if args.delog:
+    # Our feature vectors are log scaled, and we're asked to go in and de-log them. 
+    # Raise each to the 2nd power.
+    for v in vecs:
+      for i in range(0, len(v)):
+        v[i] = v[i]**2
   # Now we can actually do some clustering. 
   na = np.array(vecs)
   kmeans = KMeans(n_clusters=args.clusters, random_state=0).fit(na)
-  # Write the results of this clustering out to a file. 
+  labels = []
   for i,c in enumerate(kmeans.labels_):
-    print "%s|%s" % (args.files[i], c)
+    labels.append((str(index_to_file[i]), int(c)))
+  results = {}
+  results['labels'] = labels
+  results['name'] = 'kmeans'
+  # Write the results of this clustering out to a file. 
+  out = open('kmeans.json', 'w')
+  json.dump(results, out)
+  out.close()
   return 0
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser("cluster")
   parser.add_argument('files', nargs='+')
   parser.add_argument('--clusters', type=int, default=8)
+  parser.add_argument('--delog', default=False, action='store_true')
   args = parser.parse_args()
   sys.exit(main(args))
 

@@ -16,7 +16,7 @@ def mk_vectors(A, B):
 # Put the labels into the vectors with the same
 # ordering. Now, the ith entry in Afvec/Bfvec corresponds
 # to a particular element in A/B.
-  assert Amap.keys() == Bmap.keys()
+  assert frozenset(Amap.keys()) == frozenset(Bmap.keys())
   Afvec = []
   Bfvec = []
   for i in Amap.keys():
