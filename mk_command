@@ -13,7 +13,7 @@ def main(args):
     # Have the generated command check to see if the result json is present, if it is, then
     # we can skip feature extraction. 
     finalpath = args.output + "/" + outname + ".json"
-    l.append("[ -f " + finalpath + "] || " + args.command + " " + i[0] + " > " + finalpath)
+    l.append("[ -f " + finalpath + " ] || " + args.command + " " + i[0] + " > " + finalpath)
   for i in l:
     print i
   return 0
