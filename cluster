@@ -5,6 +5,17 @@ import argparse
 import json
 import sys
 
+def cluster_kmeans(vecs):
+  na = np.array(vecs)
+  kmeans = KMeans(n_clusters=args.clusters, random_state=0).fit(na)
+  labels = []
+  for i,c in enumerate(kmeans.labels_):
+    labels.append((str(index_to_file[i]), int(c)))
+  results = {}
+  results['labels'] = labels
+  results['name'] = 'kmeans'
+  return results 
+
 def main(args):
   # Read in all the vector files as dictionaries. 
   
@@ -43,14 +54,14 @@ def main(args):
       for i in range(0, len(v)):
         v[i] = v[i]**2
   # Now we can actually do some clustering. 
-  na = np.array(vecs)
-  kmeans = KMeans(n_clusters=args.clusters, random_state=0).fit(na)
-  labels = []
-  for i,c in enumerate(kmeans.labels_):
-    labels.append((str(index_to_file[i]), int(c)))
-  results = {}
-  results['labels'] = labels
-  results['name'] = 'kmeans'
+  cluster_meth = None
+  if args.cluster_method == 'kmeans':
+    cluster_meth = cluster_kmeans
+  else:
+    print "Unknown cluster method %s" % args.cluster_method
+    return 1
+
+  results = cluster_meth(vecs)
   # Write the results of this clustering out to a file. 
   out = open(args.outfile, 'w')
   json.dump(results, out)
@@ -64,6 +75,7 @@ if __name__ == '__main__':
   parser.add_argument('files', nargs='+')
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
+  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans'])
   args = parser.parse_args()
   sys.exit(main(args))
 

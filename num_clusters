@@ -1,0 +1,19 @@
+#!/usr/bin/env python2.7
+import argparse
+import json
+import sys
+
+def main(args):
+  c = json.load(open(args.cluster, 'r'))
+  labels = c['labels']
+  s = set()
+  for (name,label) in labels:
+    s.add(label)
+  print len(s)
+  return 0
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser("num_clusters")
+  parser.add_argument("cluster")
+  args = parser.parse_args()
+  sys.exit(main(args))
