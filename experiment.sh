@@ -17,8 +17,8 @@ $DIR/analyze_groundtruth $NAME $CSV $DIR/$NAME'-groundtruth.json' $DATAPATH
 
 echo "Generating vector extraction commands"
 # Generate vector extract commands from the JSON.
-mkdir -p $DATAPATH/vectors 
-$DIR/mk_command "$DIR/get_afl_vec \"$PROGRAM\"" $DIR/$NAME'-groundtruth.json' $DATAPATH/vectors > $DIR/$NAME'-commands'
+mkdir -p $DATAPATH/$NAME'-vectors'
+$DIR/mk_command "$DIR/get_afl_vec \"$PROGRAM\"" $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-vectors' > $DIR/$NAME'-commands'
 
 echo "Extracting vectors"
 # Run the vector extract commands through GNU parallel. 
@@ -26,5 +26,7 @@ parallel --bar < $DIR/$NAME'-commands'
 
 echo "Running clustering"
 # Run clustering on the extracted vectors. 
+$DIR/cluster --outfile=$DATAPATH/$NAME'-kmeans.json' --name=kmeans $DATAPATH/$NAME'-vectors/'*.json
 
 # Compare the produced cluster(s) with ground truth and report. 
+$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-kmeans.json'

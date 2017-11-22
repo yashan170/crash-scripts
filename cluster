@@ -52,13 +52,15 @@ def main(args):
   results['labels'] = labels
   results['name'] = 'kmeans'
   # Write the results of this clustering out to a file. 
-  out = open('kmeans.json', 'w')
+  out = open(args.outfile, 'w')
   json.dump(results, out)
   out.close()
   return 0
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser("cluster")
+  parser.add_argument('--name', type=str)
+  parser.add_argument('--outfile', type=str, default='cluster.json')
   parser.add_argument('files', nargs='+')
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
