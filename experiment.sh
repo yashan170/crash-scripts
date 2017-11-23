@@ -17,8 +17,8 @@ $DIR/analyze_groundtruth $NAME $CSV $DIR/$NAME'-groundtruth.json' $DATAPATH
 
 echo "Generating vector extraction commands"
 # Generate vector extract commands from the JSON.
-mkdir -p $DATAPATH/$NAME'-vectors'
-$DIR/mk_command "$DIR/get_afl_vec \"$PROGRAM\"" $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-vectors' > $DIR/$NAME'-commands'
+mkdir -p $DIR/$NAME'-vectors'
+$DIR/mk_command "$DIR/get_afl_vec \"$PROGRAM\"" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-vectors' > $DIR/$NAME'-commands'
 
 echo "Extracting vectors"
 # Run the vector extract commands through GNU parallel. 
@@ -26,11 +26,11 @@ parallel --bar < $DIR/$NAME'-commands'
 
 # Run clustering on the extracted vectors. 
 echo "Running KMeans clustering"
-$DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DATAPATH/$NAME'-kmeans.json' --name=kmeans $DATAPATH/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.8 $DIR/$NAME'-vectors/'*.json
 
-#echo "Running Spectral clustering"
-#$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DATAPATH/$NAME'-spectral.json' --name=spectral $DATAPATH/$NAME'-vectors/'*.json
+echo "Running Spectral clustering"
+$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.8 $DIR/$NAME'-vectors/'*.json
 
 # Compare the produced cluster(s) with ground truth and report. 
-$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-kmeans.json'
-#$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DATAPATH/$NAME'-spectral.json'
+$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
+$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
