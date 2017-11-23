@@ -11,7 +11,10 @@ import sys
 def cluster_kmeans(args, index_to_file, vecs, sel=None):
   na = np.array(vecs)
   if sel != None:
+    before_dim = na.shape
     na = sel.fit_transform(na)
+    after_dim = na.shape
+    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
   kmeans = KMeans(n_clusters=args.clusters, n_jobs=-1).fit(na)
   labels = []
   for i,c in enumerate(kmeans.labels_):
@@ -24,7 +27,10 @@ def cluster_kmeans(args, index_to_file, vecs, sel=None):
 def cluster_spectral(args, index_to_file, vecs, sel=None):
   na = np.array(vecs)
   if sel != None:
+    before_dim = na.shape
     na = sel.fit_transform(na)
+    after_dim = na.shape
+    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
   spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1).fit(na)
   labels = []
   for i,c in enumerate(spec.labels_):
@@ -36,7 +42,7 @@ def cluster_spectral(args, index_to_file, vecs, sel=None):
 
 def main(args):
   # Read in all the vector files as dictionaries. 
-  
+  print "reading in files" 
   map_dicts = []
   file_to_index = {}
   index_to_file = {}
@@ -48,6 +54,7 @@ def main(args):
     index_to_file[i] = r['file']
     i = i + 1
 
+  print "aligning dictionaries"
   # Pad out all the dicts in map.dicts to have the same key set.
   total_key_set = set()
   for m in map_dicts:
@@ -57,6 +64,7 @@ def main(args):
       if k not in m.keys():
         m[k] = 0
 
+  print "creating vectors"
   # Now, turn these into actual vectors, with an order controlled by
   # the set of all keys. 
   vecs = []
@@ -72,6 +80,7 @@ def main(args):
       for i in range(0, len(v)):
         v[i] = v[i]**2
   # Now we can actually do some clustering. 
+  print "clustering with %s" % args.cluster_method
   cluster_meth = None
   if args.cluster_method == 'kmeans':
     cluster_meth = cluster_kmeans
