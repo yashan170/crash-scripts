@@ -9,6 +9,7 @@ import numpy as np
 import argparse
 import json
 import sys
+import csv
 
 def cluster_kmeans(args, index_to_file, vecs, sel=None):
   na = np.array(vecs)
@@ -94,6 +95,23 @@ def main(args):
     index_to_file[index] = f
     index = index + 1
 
+  if args.dump_datavec:
+    print "Writing out data vector to CSV only"
+    t = vecs[0]
+    header = ["filename"]
+    header.extend([ "feature_%d" % i for i in range(0,len(t))])
+    contents = [header]
+    for i in range(0, len(vecs)):
+      c = []
+      c.append(index_to_file[i])
+      c.extend(vecs[i])
+      contents.append(c)
+    outcsv = open(args.dump_datavec, 'w')
+    writer = csv.writer(outcsv)
+    for i in contents:
+      writer.writerow(i)
+    return 0
+
   # Now we can actually do some clustering. 
   print "clustering with %s" % args.cluster_method
   cluster_meth = None
@@ -119,6 +137,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser("cluster")
   parser.add_argument('--name', type=str)
   parser.add_argument('--outfile', type=str, default='cluster.json')
+  parser.add_argument('--dump-datavec', type=str, default=None)
   parser.add_argument('files', nargs='+')
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
