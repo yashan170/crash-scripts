@@ -26,10 +26,10 @@ parallel --bar < $DIR/$NAME'-commands'
 
 # Run clustering on the extracted vectors. 
 echo "Running KMeans clustering"
-$DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.8 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
 echo "Running Spectral clustering"
-$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.8 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
 # Compare the produced cluster(s) with ground truth and report. 
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'

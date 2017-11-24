@@ -3,6 +3,8 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.feature_selection import VarianceThreshold
 from multiprocessing import Pool
+from functools import partial 
+from collections import OrderedDict
 import numpy as np
 import argparse
 import json
@@ -40,45 +42,58 @@ def cluster_spectral(args, index_to_file, vecs, sel=None):
   results['name'] = 'spectral'
   return results 
 
+def loadfile(f):
+  l = json.load(open(f, 'r'))
+  return (l['file'], l['tuples'])
+
+def alignmap(inmap, total_key_set):
+  fname,m = inmap 
+  for k in total_key_set:
+    if k not in m.keys():
+      m[k] = 0
+  return (fname,m)
+
+def createvec(inmap, total_keys):
+  fname,m = inmap 
+  vec = []
+  for k in total_keys:
+    vec.append(m[k])
+  return (fname,vec)
+
 def main(args):
+  p = Pool()
   # Read in all the vector files as dictionaries. 
   print "reading in files" 
-  map_dicts = []
-  file_to_index = {}
-  index_to_file = {}
-  i = 0
-  for f in args.files:
-    r = json.load(open(f, 'r'))
-    map_dicts.append(r['tuples'])
-    file_to_index[r['file']] = i
-    index_to_file[i] = r['file']
-    i = i + 1
+  from_files = p.map(loadfile, args.files)
 
   print "aligning dictionaries"
   # Pad out all the dicts in map.dicts to have the same key set.
-  total_key_set = set()
-  for m in map_dicts:
-    total_key_set = total_key_set.union(m.keys())
-  for m in map_dicts:
-    for k in total_key_set:
-      if k not in m.keys():
-        m[k] = 0
+  tks = set()
+  for (a,m) in from_files:
+    tks = tks.union(m.keys())
+
+  alignmappartial = partial(alignmap, total_key_set=tks)
+  aligned_dicts = p.map(alignmappartial, from_files)
 
   print "creating vectors"
+  tks_ordered = OrderedDict.fromkeys(tks)
+  createvecpartial = partial(createvec, total_keys=tks_ordered)
+
   # Now, turn these into actual vectors, with an order controlled by
   # the set of all keys. 
-  vecs = []
-  for m in map_dicts:
-    vec = []
-    for k in total_key_set:
-      vec.append(m[k])
-    vecs.append(vec)
+  vecs_with_filename = p.map(createvecpartial, aligned_dicts)
   if args.delog:
-    # Our feature vectors are log scaled, and we're asked to go in and de-log them. 
-    # Raise each to the 2nd power.
-    for v in vecs:
-      for i in range(0, len(v)):
-        v[i] = v[i]**2
+    print "Temporarily disabled de-log scaling!"
+
+  # Now, go through and flatten vecs_with_filename. 
+  vecs = []
+  index_to_file = {}
+  index = 0
+  for (f,v) in vecs_with_filename:
+    vecs.append(v)
+    index_to_file[index] = f
+    index = index + 1
+
   # Now we can actually do some clustering. 
   print "clustering with %s" % args.cluster_method
   cluster_meth = None
