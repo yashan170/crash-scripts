@@ -100,8 +100,6 @@ def main(args):
   # Now, turn these into actual vectors, with an order controlled by
   # the set of all keys. 
   vecs_with_filename = p.map(createvecpartial, aligned_dicts)
-  if args.delog:
-    print "Temporarily disabled de-log scaling!"
 
   # Now, go through and flatten vecs_with_filename. 
   vecs = []
@@ -111,6 +109,11 @@ def main(args):
     vecs.append(v)
     index_to_file[index] = f
     index = index + 1
+  
+  if args.delog:
+    for i in range(0, len(vecs)):
+      for j in range(0, len(vecs[i])):
+        vecs[i][j] = vecs[i][j] ** 2
 
   if args.dump_datavec:
     print "Writing out data vector to CSV only"
