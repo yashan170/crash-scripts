@@ -2,6 +2,7 @@
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import AgglomerativeClustering
 from sklearn.feature_selection import VarianceThreshold
 from multiprocessing import Pool
 from functools import partial 
@@ -12,53 +13,37 @@ import json
 import sys
 import csv
 
-def cluster_dbscan(args, index_to_file, vecs, sel=None):
+def cluster_lifted(args, index_to_file, vecs, sel, c, name):
   na = np.array(vecs)
   if sel != None:
     before_dim = na.shape
     na = sel.fit_transform(na)
     after_dim = na.shape
     print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
-  dbscan = DBSCAN(n_jobs=-1).fit(na)
+  r = c.fit(na)
   labels = []
-  for i,c in enumerate(dbscan.labels_):
+  for i,c in enumerate(r.labels_):
     labels.append((str(index_to_file[i]), int(c)))
   results = {}
-  results['name'] = 'dbscan'
+  results['name'] = name
   results['labels'] = labels
   return results
 
+def cluster_agglomerative(args, index_to_file, vecs, sel=None):
+  agg = AgglomerativeClustering(n_clusters=args.clusters)
+  return cluster_lifted(args, index_to_file, vecs, sel, agg, 'agg')
+
+def cluster_dbscan(args, index_to_file, vecs, sel=None):
+  dbscan = DBSCAN(n_jobs=-1)
+  return cluster_lifted(args, index_to_file, vecs, sel, dbscan, 'dbscan')
+
 def cluster_kmeans(args, index_to_file, vecs, sel=None):
-  na = np.array(vecs)
-  if sel != None:
-    before_dim = na.shape
-    na = sel.fit_transform(na)
-    after_dim = na.shape
-    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
-  kmeans = KMeans(n_clusters=args.clusters, n_jobs=-1).fit(na)
-  labels = []
-  for i,c in enumerate(kmeans.labels_):
-    labels.append((str(index_to_file[i]), int(c)))
-  results = {}
-  results['labels'] = labels
-  results['name'] = 'kmeans'
-  return results 
+  kmeans = KMeans(n_clusters=args.clusters, n_jobs=-1)
+  return cluster_lifted(args, index_to_file, vecs, sel, kmeans, 'kmeans')
 
 def cluster_spectral(args, index_to_file, vecs, sel=None):
-  na = np.array(vecs)
-  if sel != None:
-    before_dim = na.shape
-    na = sel.fit_transform(na)
-    after_dim = na.shape
-    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
-  spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1).fit(na)
-  labels = []
-  for i,c in enumerate(spec.labels_):
-    labels.append((str(index_to_file[i]), int(c)))
-  results = {}
-  results['labels'] = labels
-  results['name'] = 'spectral'
-  return results 
+  spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1)
+  return cluster_lifted(args, index_to_file, vecs, sel, spec, 'spectral')
 
 def loadfile(f):
   l = json.load(open(f, 'r'))
@@ -141,6 +126,8 @@ def main(args):
     cluster_meth = cluster_spectral
   elif args.cluster_method == 'dbscan':
     cluster_meth = cluster_dbscan
+  elif args.cluster_method == 'agg':
+    cluster_meth = cluster_agglomerative
   else:
     print "Unknown cluster method %s" % args.cluster_method
     return 1
@@ -164,7 +151,7 @@ if __name__ == '__main__':
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
   parser.add_argument('--variance-threshold', default=None, type=float)
-  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral', 'dbscan'])
+  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral', 'dbscan', 'agg'])
   args = parser.parse_args()
   sys.exit(main(args))
 
