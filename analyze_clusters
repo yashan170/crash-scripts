@@ -91,6 +91,10 @@ def do_fmeasure(A, B):
   ASet, BSet = mk_sets(A, B)
   return f_measure(ASet, BSet)
 
+def do_ari(A, B):
+  AVec, BVec = mk_vectors(A, B)
+  return metrics.adjusted_rand_score(AVec, BVec)
+
 def main(args):
   clusters = []
   truth = json.load(open(args.groundtruth, 'r'))
@@ -99,6 +103,8 @@ def main(args):
     cmp_meth = do_fmi
   elif args.method == "f":
     cmp_meth = do_fmeasure
+  elif args.method == "ari":
+    cmp_meth = do_ari
   else:
     print "Invalid clustering algorithm"
     return 1
@@ -115,6 +121,6 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser("analyze_clusters")
   parser.add_argument("groundtruth", help="Ground truth data", type=str)
   parser.add_argument("clusters", help="Clusters in JSON format", nargs='+')
-  parser.add_argument("-m", "--method", help="Clustering method", type=str, default="fmi", choices=["fmi", "f"])
+  parser.add_argument("-m", "--method", help="Clustering method", type=str, default="fmi", choices=["fmi", "f", "ari"])
   args = parser.parse_args()
   sys.exit(main(args)) 
