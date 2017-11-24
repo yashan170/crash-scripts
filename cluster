@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
+from sklearn.cluster import DBSCAN
 from sklearn.feature_selection import VarianceThreshold
 from multiprocessing import Pool
 from functools import partial 
@@ -10,6 +11,22 @@ import argparse
 import json
 import sys
 import csv
+
+def cluster_dbscan(args, index_to_file, vecs, sel=None):
+  na = np.array(vecs)
+  if sel != None:
+    before_dim = na.shape
+    na = sel.fit_transform(na)
+    after_dim = na.shape
+    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
+  dbscan = DBSCAN(n_jobs=-1).fit(na)
+  labels = []
+  for i,c in enumerate(dbscan.labels_):
+    labels.append((str(index_to_file[i]), int(c)))
+  results = {}
+  results['name'] = 'dbscan'
+  results['labels'] = labels
+  return results
 
 def cluster_kmeans(args, index_to_file, vecs, sel=None):
   na = np.array(vecs)
@@ -119,6 +136,8 @@ def main(args):
     cluster_meth = cluster_kmeans
   elif args.cluster_method == 'spectral':
     cluster_meth = cluster_spectral
+  elif args.cluster_method == 'dbscan':
+    cluster_meth = cluster_dbscan
   else:
     print "Unknown cluster method %s" % args.cluster_method
     return 1
@@ -142,7 +161,7 @@ if __name__ == '__main__':
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
   parser.add_argument('--variance-threshold', default=None, type=float)
-  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral'])
+  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral', 'dbscan'])
   args = parser.parse_args()
   sys.exit(main(args))
 
