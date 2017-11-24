@@ -31,6 +31,11 @@ $DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DIR/$NAME'-kmeans.
 echo "Running Spectral clustering"
 $DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
+echo "Running DBSCAN clustering"
+$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+
 # Compare the produced cluster(s) with ground truth and report. 
+echo "Comparing clusters using FMI"
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
+$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-dbscan.json'
