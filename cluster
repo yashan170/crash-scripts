@@ -14,6 +14,8 @@ import argparse
 import json
 import sys
 import csv
+import glob
+import os
 
 def cluster_lifted(args, index_to_file, vecs, sel, c):
   na = np.array(vecs)
@@ -82,7 +84,14 @@ def main(args):
   p = Pool()
   # Read in all the vector files as dictionaries. 
   print "reading in files" 
-  from_files = p.map(loadfile, args.files)
+  files = []
+  for i in args.files:
+    if os.path.isdir(i):
+      for j in glob.glob(i+os.path.sep+"*.json"):
+        files.append(j)
+    else:
+      files.append(i)
+  from_files = p.map(loadfile, files)
 
   print "aligning dictionaries"
   # Pad out all the dicts in map.dicts to have the same key set.
