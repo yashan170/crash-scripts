@@ -26,16 +26,39 @@ parallel --bar < $DIR/$NAME'-commands'
 
 # Run clustering on the extracted vectors. 
 echo "Running KMeans clustering"
-$DIR/cluster --cluster-method=kmeans --clusters=28 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --pca=0.95 --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
-echo "Running Spectral clustering"
-$DIR/cluster --cluster-method=spectral --clusters=28 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+#echo "Running Spectral clustering"
+#$DIR/cluster --cluster-method=spectral --clusters=25 --outfile=$DIR/$NAME'-spectral.json' --name=spectral --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
 echo "Running DBSCAN clustering"
-$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --pca=0.95 --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+
+echo "Running Aggregate clustering"
+$DIR/cluster --pca=0.95 --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg.json' --name=agg --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
 
 # Compare the produced cluster(s) with ground truth and report. 
 echo "Comparing clusters using FMI"
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
-$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
+#$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-dbscan.json'
+$DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-agg.json'
+
+echo "Comparing clusters using F"
+$DIR/analyze_clusters --method="f" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
+#$DIR/analyze_clusters --method="f" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
+$DIR/analyze_clusters --method="f" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-dbscan.json'
+$DIR/analyze_clusters --method="f" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-agg.json'
+
+echo "Comparing clusters using ARI"
+$DIR/analyze_clusters --method="ari" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
+#$DIR/analyze_clusters --method="ari" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
+$DIR/analyze_clusters --method="ari" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-dbscan.json'
+$DIR/analyze_clusters --method="ari" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-agg.json'
+
+echo "Comparing clusters using AMI"
+$DIR/analyze_clusters --method="ami" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
+#$DIR/analyze_clusters --method="ami" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-spectral.json'
+$DIR/analyze_clusters --method="ami" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-dbscan.json'
+$DIR/analyze_clusters --method="ami" $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-agg.json'
+

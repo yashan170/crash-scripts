@@ -4,6 +4,7 @@ from sklearn.cluster import SpectralClustering
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.decomposition import PCA
 from multiprocessing import Pool
 from functools import partial 
 from collections import OrderedDict
@@ -20,7 +21,17 @@ def cluster_lifted(args, index_to_file, vecs, sel, c, name):
     na = sel.fit_transform(na)
     after_dim = na.shape
     print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
+  
+  if args.pca != None:
+    pca = PCA(n_components=args.pca, svd_solver='full')
+    before_dim = na.shape
+    na = pca.fit_transform(na)
+    after_dim = na.shape
+    print "PCA reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
+    print "%s" % (str(pca.explained_variance_ratio_[0:20]))
+
   r = c.fit(na)
+
   labels = []
   for i,c in enumerate(r.labels_):
     labels.append((str(index_to_file[i]), int(c)))
@@ -51,9 +62,12 @@ def loadfile(f):
 
 def alignmap(inmap, total_key_set):
   fname,m = inmap 
-  for k in total_key_set:
-    if k not in m.keys():
-      m[k] = 0
+  diff = total_key_set.difference(m.keys())
+  for k in diff:
+    m[k] = 0
+#  for k in total_key_set:
+#    if k not in m.keys():
+#      m[k] = 0
   return (fname,m)
 
 def createvec(inmap, total_keys):
@@ -148,6 +162,7 @@ if __name__ == '__main__':
   parser.add_argument('--outfile', type=str, default='cluster.json')
   parser.add_argument('--dump-datavec', type=str, default=None)
   parser.add_argument('files', nargs='+')
+  parser.add_argument('--pca', type=float, default=None)
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
   parser.add_argument('--variance-threshold', default=None, type=float)
