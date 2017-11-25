@@ -31,47 +31,58 @@ parallel --bar < $DIR/$NAME'-commands'
 echo "Extracting vectors for PIN"
 parallel --bar < $DIR/$NAME'-itrace-commands'
 
+# method clusters $outfile name variance inname pca?
+run_cluster () {
+  #Do we run with PCA or not? 
+if [ -z "$7" ]
+  then
+		$DIR/cluster --cluster-method=$1 --clusters=$2 --outfile=$3 --name=$4 --variance-threshold=$5 $6
+	else
+		$DIR/cluster --cluster-method=$1 --clusters=$2 --outfile=$3 --name=$4 --variance-threshold=$5 --pca=$7 $6
+fi
+}
+
 # Run clustering on the extracted vectors. 
 echo "Running KMeans clustering(AFL)"
-$DIR/cluster --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "kmeans" 25 $DIR/$NAME'-kmeans.json' "kmeans" "0.9" $DIR/$NAME'-vectors'
 echo "Running KMeans clustering(PIN)"
-$DIR/cluster --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans-itrace.json' --name=kmeans-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "kmeans" 25 $DIR/$NAME'-kmeans-itrace.json' "kmeans-itrace" "0.9" $DIR/$NAME'-itrace-vectors'
 
 echo "Running KMeans(PCA) clustering(AFL)"
-$DIR/cluster --pca=0.95 --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans-pca.json' --name=kmeans-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "kmeans" 25 $DIR/$NAME'-kmeans-pca.json' "kmeans-pca" "0.9" $DIR/$NAME'-vectors' "0.95"
 
 echo "Running KMeans(PCA) clustering(PIN)"
-$DIR/cluster --pca=0.95 --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans-pca-itrace.json' --name=kmeans-pca-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "kmeans" 25 $DIR/$NAME'-kmeans-pca-itrace.json' "kmeans-pca-itrace" "0.9" $DIR/$NAME'-itrace-vectors' "0.95"
 
 echo "Running DBSCAN clustering(AFL)"
-$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "dbscan" 0 $DIR/$NAME'-dbscan.json' "dbscan" "0.9" $DIR/$NAME'-vectors'
 
 echo "Running DBSCAN clustering(PIN)"
-$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan-itrace.json' --name=dbscan-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "dbscan" 0 $DIR/$NAME'-dbscan-itrace.json' "dbscan-itrace" "0.9" $DIR/$NAME'-itrace-vectors'
 
 echo "Running Aggregate clustering(AFL)"
-$DIR/cluster --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg.json' --name=agg --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "agg" 25 $DIR/$NAME'-agg.json' "agg" "0.9" $DIR/$NAME'-vectors'
 
 echo "Running Aggregate clustering(PIN)"
-$DIR/cluster --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg-itrace.json' --name=agg-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "agg" 25 $DIR/$NAME'-agg-itrace.json' "agg-itrace" "0.9" $DIR/$NAME'-itrace-vectors'
 
 echo "Running Aggregate(PCA) clustering(AFL)"
-$DIR/cluster --pca=0.95 --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg-pca.json' --name=agg-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "agg" 25 $DIR/$NAME'-agg-pca.json' "agg-pca" "0.9" $DIR/$NAME'-vectors' "0.95"
 
 echo "Running Aggregate(PCA) clustering(PIN)"
-$DIR/cluster --pca=0.95 --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg-pca-itrace.json' --name=agg-pca-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "agg" 25 $DIR/$NAME'-agg-pca-itrace.json' "agg-pca-itrace" "0.9" $DIR/$NAME'-itrace-vectors' "0.95"
 
 echo "Running MeanShift clustering(AFL)"
-$DIR/cluster --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift.json' --name=meanshift --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "meanshift" 0 $DIR/$NAME'-meanshift.json' 'meanshift' "0.9" $DIR/$NAME'-vectors'
 
 echo "Running MeanShift clustering(PIN)"
-$DIR/cluster --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift-itrace.json' --name=meanshift-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "meanshift" 0 $DIR/$NAME'-meanshift-itrace.json' 'meanshift-itrace' "0.9" $DIR/$NAME'-itrace-vectors'
 
 echo "Running MeanShift(PCA) clustering(AFL)"
-$DIR/cluster --pca=0.95 --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift-pca.json' --name=meanshift-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
+run_cluster "meanshift" 0 $DIR/$NAME'-meanshift-pca.json' 'meanshift-pca' "0.9" $DIR/$NAME'-vectors' "0.95"
 
 echo "Running MeanShift(PCA) clustering(PIN)"
-$DIR/cluster --pca=0.95 --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift-pca-itrace.json' --name=meanshift-pca-itrace --variance-threshold=0.9 $DIR/$NAME'-itrace-vectors'
+run_cluster "meanshift" 0 $DIR/$NAME'-meanshift-pca-itrace.json' 'meanshift-pca-itrace' "0.9" $DIR/$NAME'-itrace-vectors' "0.95"
 
 compare_results () {
   $DIR/analyze_clusters --method=$1 $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
