@@ -54,18 +54,18 @@ VOID printip(ADDRINT ip, THREADID tid) {
 // Pin calls this function every time a new instruction is encountered
 VOID Instruction(INS ins, VOID *v)
 {
-    if (INS_Valid(ins) ) {
-      RTN r = INS_Rtn(ins);
-      if (RTN_Valid(r)) {
-        SEC s = RTN_Sec(r);
-	if (SEC_Valid(s)) {
-          IMG img = SEC_Img(s);
-          if (INS_IsDirectBranchOrCall(ins) && IMG_Valid(img) && IMG_IsMainExecutable(img) ) { 
-            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)printip, IARG_INST_PTR, IARG_THREAD_ID, IARG_END);
-          }
-	}
-      }
+  if (INS_Valid(ins) ) {
+    RTN r = INS_Rtn(ins);
+    if (RTN_Valid(r)) {
+      SEC s = RTN_Sec(r);
+	    if (SEC_Valid(s)) {
+        IMG img = SEC_Img(s);
+        if (INS_IsDirectBranchOrCall(ins) && IMG_Valid(img) && IMG_IsMainExecutable(img) ) { 
+          INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)printip, IARG_INST_PTR, IARG_THREAD_ID, IARG_END);
+        }
+	    }
     }
+  }
 }
 
 // This function is called when the application exits
