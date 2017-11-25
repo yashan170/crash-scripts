@@ -1,5 +1,7 @@
 #!/usr/bin/env python2.7
 from sklearn import metrics
+from functools import partial
+from multiprocessing import Pool
 import itertools as it
 import argparse
 import json
@@ -41,27 +43,35 @@ def mk_sets(A, B):
 
   return (ASet,BSet)
 
-def f_measure(truth, guess, beta=1.0):
+def f_calculate(param, t, g):
+  a,b = param
   tp = fp = fn = 0
+  truth_a = t[a]
+  truth_b = t[b]
+  guess_a = g[a]
+  guess_b = g[b]
+
+  if truth_a==truth_b:
+    if guess_a==guess_b:
+      tp += 1
+    else:
+      fn += 1
+  elif guess_a==guess_b:
+    fp += 1
+  # True negatives not used
+  return (tp, fp, fn)
+
+def f_measure(truth, guess, beta=1.0):
   t_map = create_mapping(truth)
   g_map = create_mapping(guess)
 
   g_collapsed = set().union(*guess) # g_collapsed = guess[0] U guess[1] U ... U guess[n]
+ 
+  p = Pool()
+  mapfun = partial(f_calculate, t=t_map, g=g_map)
 
-  for a,b in it.combinations(g_collapsed, 2):
-    truth_a = t_map[a]
-    truth_b = t_map[b]
-    guess_a = g_map[a]
-    guess_b = g_map[b]
-
-    if truth_a==truth_b:
-      if guess_a==guess_b:
-        tp += 1
-      else:
-        fn += 1
-    elif guess_a==guess_b:
-      fp += 1
-    # True negatives not used
+  parresults = p.map(mapfun, it.combinations(g_collapsed, 2))
+  tp,fp,fn = reduce(lambda x,y:(x[0]+y[0],x[1]+y[1],x[2]+y[2]), parresults)
 
   precision = float(tp)/(tp+fp)
   recall = float(tp)/(tp+fn)
