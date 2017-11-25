@@ -3,6 +3,7 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import MeanShift
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.decomposition import PCA
 from multiprocessing import Pool
@@ -14,7 +15,7 @@ import json
 import sys
 import csv
 
-def cluster_lifted(args, index_to_file, vecs, sel, c, name):
+def cluster_lifted(args, index_to_file, vecs, sel, c):
   na = np.array(vecs)
   if sel != None:
     before_dim = na.shape
@@ -35,25 +36,29 @@ def cluster_lifted(args, index_to_file, vecs, sel, c, name):
   for i,c in enumerate(r.labels_):
     labels.append((str(index_to_file[i]), int(c)))
   results = {}
-  results['name'] = name
+  results['name'] = args.name
   results['labels'] = labels
   return results
 
+def cluster_meanshift(args, index_to_file, vecs, sel=None):
+  ms = MeanShift(n_jobs=-1)
+  return cluster_lifted(args, index_to_file, vecs, sel, ms)
+
 def cluster_agglomerative(args, index_to_file, vecs, sel=None):
   agg = AgglomerativeClustering(n_clusters=args.clusters)
-  return cluster_lifted(args, index_to_file, vecs, sel, agg, 'agg')
+  return cluster_lifted(args, index_to_file, vecs, sel, agg)
 
 def cluster_dbscan(args, index_to_file, vecs, sel=None):
   dbscan = DBSCAN(n_jobs=-1)
-  return cluster_lifted(args, index_to_file, vecs, sel, dbscan, 'dbscan')
+  return cluster_lifted(args, index_to_file, vecs, sel, dbscan)
 
 def cluster_kmeans(args, index_to_file, vecs, sel=None):
   kmeans = KMeans(n_clusters=args.clusters, n_jobs=-1)
-  return cluster_lifted(args, index_to_file, vecs, sel, kmeans, 'kmeans')
+  return cluster_lifted(args, index_to_file, vecs, sel, kmeans)
 
 def cluster_spectral(args, index_to_file, vecs, sel=None):
   spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1)
-  return cluster_lifted(args, index_to_file, vecs, sel, spec, 'spectral')
+  return cluster_lifted(args, index_to_file, vecs, sel, spec)
 
 def loadfile(f):
   l = json.load(open(f, 'r'))
@@ -138,6 +143,8 @@ def main(args):
     cluster_meth = cluster_dbscan
   elif args.cluster_method == 'agg':
     cluster_meth = cluster_agglomerative
+  elif args.cluster_method == 'meanshift':
+    cluster_meth = cluster_meanshift
   else:
     print "Unknown cluster method %s" % args.cluster_method
     return 1
@@ -162,7 +169,7 @@ if __name__ == '__main__':
   parser.add_argument('--clusters', type=int, default=8)
   parser.add_argument('--delog', default=False, action='store_true')
   parser.add_argument('--variance-threshold', default=None, type=float)
-  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral', 'dbscan', 'agg'])
+  parser.add_argument('--cluster-method', type=str, default='kmeans', choices=['kmeans', 'spectral', 'dbscan', 'agg', 'meanshift'])
   args = parser.parse_args()
   sys.exit(main(args))
 
