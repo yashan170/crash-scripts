@@ -26,25 +26,26 @@ parallel --bar < $DIR/$NAME'-commands'
 
 # Run clustering on the extracted vectors. 
 echo "Running KMeans clustering"
-$DIR/cluster --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans.json' --name=kmeans --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running KMeans(PCA) clustering"
-$DIR/cluster --pca=0.95 --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans-pca.json' --name=kmeans-pca --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --pca=0.95 --cluster-method=kmeans --clusters=25 --outfile=$DIR/$NAME'-kmeans-pca.json' --name=kmeans-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running DBSCAN clustering"
-$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=dbscan --outfile=$DIR/$NAME'-dbscan.json' --name=dbscan --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running Aggregate clustering"
-$DIR/cluster --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg.json' --name=agg --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg.json' --name=agg --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running Aggregate(PCA) clustering"
-$DIR/cluster --pca=0.95 --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg-pca.json' --name=agg-pca --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --pca=0.95 --cluster-method=agg --clusters=25 --outfile=$DIR/$NAME'-agg-pca.json' --name=agg-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running MeanShift clustering"
-$DIR/cluster --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift.json' --name=meanshift --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift.json' --name=meanshift --variance-threshold=0.9 $DIR/$NAME'-vectors'
 
 echo "Running MeanShift(PCA) clustering"
-$DIR/cluster --pca=0.95 --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift-pca.json' --name=meanshift-pca --variance-threshold=0.9 $DIR/$NAME'-vectors/'*.json
+$DIR/cluster --pca=0.95 --cluster-method=meanshift --outfile=$DIR/$NAME'-meanshift-pca.json' --name=meanshift-pca --variance-threshold=0.9 $DIR/$NAME'-vectors'
+
 # Compare the produced cluster(s) with ground truth and report. 
 echo "Comparing clusters using FMI"
 $DIR/analyze_clusters $DIR/$NAME'-groundtruth.json' $DIR/$NAME'-kmeans.json'
