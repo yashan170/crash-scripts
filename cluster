@@ -28,7 +28,6 @@ def cluster_lifted(args, index_to_file, vecs, sel, c, name):
     na = pca.fit_transform(na)
     after_dim = na.shape
     print "PCA reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
-    print "%s" % (str(pca.explained_variance_ratio_[0:20]))
 
   r = c.fit(na)
 
@@ -65,9 +64,6 @@ def alignmap(inmap, total_key_set):
   diff = total_key_set.difference(m.keys())
   for k in diff:
     m[k] = 0
-#  for k in total_key_set:
-#    if k not in m.keys():
-#      m[k] = 0
   return (fname,m)
 
 def createvec(inmap, total_keys):
