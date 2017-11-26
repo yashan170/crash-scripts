@@ -17,6 +17,15 @@ import csv
 import glob
 import os
 
+def cluster_mk_results(args, r, index_to_file):
+  labels = []
+  for i,c in enumerate(r.labels_):
+    labels.append((str(index_to_file[i]), int(c)))
+  results = {}
+  results['name'] = args.name
+  results['labels'] = labels
+  return results
+
 def cluster_lifted(args, index_to_file, vecs, sel, c):
   na = np.array(vecs)
   if sel != None:
@@ -33,14 +42,7 @@ def cluster_lifted(args, index_to_file, vecs, sel, c):
     print "PCA reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
 
   r = c.fit(na)
-
-  labels = []
-  for i,c in enumerate(r.labels_):
-    labels.append((str(index_to_file[i]), int(c)))
-  results = {}
-  results['name'] = args.name
-  results['labels'] = labels
-  return results
+  return cluster_mk_results(args, r, index_to_file)
 
 def cluster_meanshift(args, index_to_file, vecs, sel=None):
   ms = MeanShift(n_jobs=-1)

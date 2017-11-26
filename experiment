@@ -14,7 +14,7 @@ def main(args):
   experiments = []
   experiments.append(("KMeans clustering with AFL", 
                       "kmeans", 
-                      25, 
+                      20, 
                       "%s-kmeans.json" % args.name, 
                       "kmeans", 
                       0.9, 
@@ -22,7 +22,7 @@ def main(args):
                       None))
   experiments.append(("KMeans clustering with PIN", 
                       "kmeans", 
-                      25, 
+                      20, 
                       "%s-kmeans-itrace.json" % args.name, 
                       "kmeans-itrace", 
                       0.9, 
@@ -30,7 +30,7 @@ def main(args):
                       None))
   experiments.append(("KMeans(PCA) clustering with PIN", 
                       "kmeans", 
-                      25, 
+                      20, 
                       "%s-kmeans-pca-itrace.json" % args.name, 
                       "kmeans-pca-itrace", 
                       0.9, 
@@ -38,9 +38,41 @@ def main(args):
                       0.95))
   experiments.append(("KMeans(PCA) clustering with AFL", 
                       "kmeans", 
-                      25, 
+                      20, 
                       "%s-kmeans-pca" % args.name, 
                       "kmeans-pca", 
+                      0.9, 
+                      afl_vectors_name, 
+                      0.95))
+  experiments.append(("Spectral clustering with AFL", 
+                      "spectral", 
+                      20, 
+                      "%s-spectral.json" % args.name, 
+                      "spectral", 
+                      0.9, 
+                      afl_vectors_name,
+                      None))
+  experiments.append(("Spectral clustering with PIN", 
+                      "spectral", 
+                      20, 
+                      "%s-spectral-itrace.json" % args.name, 
+                      "spectral-itrace", 
+                      0.9, 
+                      itrace_vectors_name, 
+                      None))
+  experiments.append(("Spectral(PCA) clustering with PIN", 
+                      "spectral", 
+                      20, 
+                      "%s-spectral-pca-itrace.json" % args.name, 
+                      "spectral-pca-itrace", 
+                      0.9, 
+                      itrace_vectors_name, 
+                      0.95))
+  experiments.append(("Spectral(PCA) clustering with AFL", 
+                      "spectral", 
+                      20, 
+                      "%s-spectral-pca" % args.name, 
+                      "spectral-pca", 
                       0.9, 
                       afl_vectors_name, 
                       0.95))
@@ -78,7 +110,7 @@ def main(args):
                       None))
   experiments.append(("Aggregate clustering with PIN", 
                       "agg", 
-                      25, 
+                      20, 
                       "%s-agg-itrace.json" % args.name, 
                       "agg-itrace", 
                       0.9, 
@@ -86,7 +118,7 @@ def main(args):
                       None))
   experiments.append(("Aggregate clustering with AFL", 
                       "agg", 
-                      25, 
+                      20, 
                       "%s-agg.json" % args.name, 
                       "agg", 
                       0.9, 
