@@ -11,18 +11,102 @@ def main(args):
   afl_vectors_name = "%s-vectors" % args.name
   itrace_vectors_name = "%s-itrace-vectors" % args.name
   experiments = []
-  experiments.append(("KMeans clustering with AFL", "kmeans", 25, "%s-kmeans.json" % args.name, "kmeans", 0.9, afl_vectors_name,None))
-  experiments.append(("KMeans clustering with PIN", "kmeans", 25, "%s-kmeans-itrace.json" % args.name, "kmeans-itrace", 0.9, itrace_vectors_name, None))
-  experiments.append(("KMeans(PCA) clustering with PIN", "kmeans", 25, "%s-kmeans-pca-itrace.json" % args.name, "kmeans-pca-itrace", 0.9, itrace_vectors_name, 0.95))
-  experiments.append(("KMeans(PCA) clustering with AFL", "kmeans", 25, "%s-kmeans-pca" % args.name, "kmeans-pca", 0.9, afl_vectors_name, 0.95))
-  experiments.append(("MeanShift(PCA) clustering with PIN", "meanshift", None, "%s-meanshift-pca-itrace.json" % args.name, "meanshift-pca-itrace", 0.9, itrace_vectors_name,0.95))
-  experiments.append(("MeanShift(PCA) clustering with AFL", "meanshift", None, "%s-meanshift-pca.json" % args.name, "meanshift-pca", 0.9, afl_vectors_name, 0.95))
-  experiments.append(("MeanShift clustering with PIN", "meanshift", None, "%s-meanshift-itrace.json" % args.name, "meanshift-itrace", 0.9, itrace_vectors_name,None))
-  experiments.append(("MeanShift clustering with AFL", "meanshift", None, "%s-meanshift.json" % args.name, "meanshift", 0.9, afl_vectors_name,None))
-  experiments.append(("Aggregate clustering with PIN", "agg", 25, "%s-agg-itrace.json" % args.name, "agg-itrace", 0.9, itrace_vectors_name,None))
-  experiments.append(("Aggregate clustering with AFL", "agg", 25, "%s-agg.json" % args.name, "agg", 0.9, afl_vectors_name, None))
-  experiments.append(("DBSCAN clustering with PIN", "dbscan", None, "%s-dbscan-itrace.json" % args.name, "dbscan-itrace", 0.9, itrace_vectors_name, None))
-  experiments.append(("DBSCAN clustering with AFL", "dbscan", None, "%s-dbscan.json" % args.name, "dbscan", 0.9, afl_vectors_name, None))
+  experiments.append(("KMeans clustering with AFL", 
+                      "kmeans", 
+                      25, 
+                      "%s-kmeans.json" % args.name, 
+                      "kmeans", 
+                      0.9, 
+                      afl_vectors_name,
+                      None))
+  experiments.append(("KMeans clustering with PIN", 
+                      "kmeans", 
+                      25, 
+                      "%s-kmeans-itrace.json" % args.name, 
+                      "kmeans-itrace", 
+                      0.9, 
+                      itrace_vectors_name, 
+                      None))
+  experiments.append(("KMeans(PCA) clustering with PIN", 
+                      "kmeans", 
+                      25, 
+                      "%s-kmeans-pca-itrace.json" % args.name, 
+                      "kmeans-pca-itrace", 
+                      0.9, 
+                      itrace_vectors_name, 
+                      0.95))
+  experiments.append(("KMeans(PCA) clustering with AFL", 
+                      "kmeans", 
+                      25, 
+                      "%s-kmeans-pca" % args.name, 
+                      "kmeans-pca", 
+                      0.9, 
+                      afl_vectors_name, 
+                      0.95))
+  experiments.append(("MeanShift(PCA) clustering with PIN", 
+                      "meanshift", 
+                      None, 
+                      "%s-meanshift-pca-itrace.json" % args.name, 
+                      "meanshift-pca-itrace", 
+                      0.9, 
+                      itrace_vectors_name,
+                      0.95))
+  experiments.append(("MeanShift(PCA) clustering with AFL", 
+                      "meanshift", 
+                      None, 
+                      "%s-meanshift-pca.json" % args.name, 
+                      "meanshift-pca", 
+                      0.9, 
+                      afl_vectors_name, 
+                      0.95))
+  experiments.append(("MeanShift clustering with PIN", 
+                      "meanshift", 
+                      None, 
+                      "%s-meanshift-itrace.json" % args.name, 
+                      "meanshift-itrace", 
+                      0.9, 
+                      itrace_vectors_name,
+                      None))
+  experiments.append(("MeanShift clustering with AFL", 
+                      "meanshift", 
+                      None, 
+                      "%s-meanshift.json" % args.name, 
+                      "meanshift", 
+                      0.9, 
+                      afl_vectors_name,
+                      None))
+  experiments.append(("Aggregate clustering with PIN", 
+                      "agg", 
+                      25, 
+                      "%s-agg-itrace.json" % args.name, 
+                      "agg-itrace", 
+                      0.9, 
+                      itrace_vectors_name,
+                      None))
+  experiments.append(("Aggregate clustering with AFL", 
+                      "agg", 
+                      25, 
+                      "%s-agg.json" % args.name, 
+                      "agg", 
+                      0.9, 
+                      afl_vectors_name, 
+                      None))
+  experiments.append(("DBSCAN clustering with PIN", 
+                      "dbscan", 
+                      None, 
+                      "%s-dbscan-itrace.json" % args.name, 
+                      "dbscan-itrace", 
+                      0.9, 
+                      itrace_vectors_name, 
+                      None))
+  experiments.append(("DBSCAN clustering with AFL", 
+                      "dbscan", 
+                      None, 
+                      "%s-dbscan.json" % args.name, 
+                      "dbscan", 
+                      0.9, 
+                      afl_vectors_name, 
+                      None))
 
   print "Generating ground truth data"
   subprocess.check_call(["./analyze_groundtruth", args.name, args.csv, groundtruth_name, args.datapath])
