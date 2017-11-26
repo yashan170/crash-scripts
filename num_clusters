@@ -6,10 +6,18 @@ import sys
 def main(args):
   c = json.load(open(args.cluster, 'r'))
   labels = c['labels']
+  print "Number of elements: %d" % len(labels)
   s = set()
   for (name,label) in labels:
     s.add(label)
-  print len(s)
+  print "Number of clusters %d" % len(s)
+  count_labels = {}
+  for (name,label) in labels:
+    count_labels[label] = count_labels.get(label, 0)
+    count_labels[label] = count_labels[label] + 1
+  print "label|count"
+  for label in count_labels:
+    print "%s|%d" % (str(label),count_labels[label])
   return 0
 
 if __name__ == '__main__':
