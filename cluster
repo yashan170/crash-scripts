@@ -1,9 +1,11 @@
 #!/usr/bin/env python2
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
+from sklearn.cluster import spectral_clustering
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import MeanShift
+from sklearn.metrics.pairwise import cosine_similarity 
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.decomposition import PCA
 from multiprocessing import Pool
@@ -61,8 +63,25 @@ def cluster_kmeans(args, index_to_file, vecs, sel=None):
   return cluster_lifted(args, index_to_file, vecs, sel, kmeans)
 
 def cluster_spectral(args, index_to_file, vecs, sel=None):
-  spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1)
-  return cluster_lifted(args, index_to_file, vecs, sel, spec)
+  na = np.array(vecs)
+  if sel != None:
+    before_dim = na.shape
+    na = sel.fit_transform(na)
+    after_dim = na.shape
+    print "Reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
+  
+  if args.pca != None:
+    pca = PCA(n_components=args.pca, svd_solver='full')
+    before_dim = na.shape
+    na = pca.fit_transform(na)
+    after_dim = na.shape
+    print "PCA reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
+
+  nb = cosine_similarity(na)
+  spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1, affinity='precomputed')
+  r = spec.fit(nb)
+
+  return cluster_mk_results(args, r, index_to_file)
 
 def loadfile(f):
   l = json.load(open(f, 'r'))
