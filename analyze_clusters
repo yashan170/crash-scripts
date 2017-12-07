@@ -98,8 +98,8 @@ def do_fmi(A, B):
   return metrics.fowlkes_mallows_score(AVec, BVec)
 
 def do_fmeasure(A, B):
-  ASet, BSet = mk_sets(A, B)
-  return f_measure(ASet, BSet)
+  AVec, BVec = mk_vectors(A, B)
+  return metrics.f1_score(AVec, BVec, average='micro')
 
 def do_ari(A, B):
   AVec, BVec = mk_vectors(A, B)
