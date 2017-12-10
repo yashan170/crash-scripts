@@ -1,8 +1,10 @@
 #!/usr/bin/env python2.7
 import argparse
+import glob
 import json
 import csv
 import sys
+import os
 
 EXTRA_PATH = "/data/bff-results/bff/results/crashers/%s/%s"
 
@@ -17,7 +19,7 @@ Something this code needs to do:
   differently in the future. 
 """
 
-def main(args):
+def ed_data(args):
   truths = {}
   truths["name"] = args.name
   truths["labels"] = []
@@ -32,19 +34,72 @@ def main(args):
       fixes = [ i.split(":")[0] for i in vfixes.split(" ")]
       fixes_s = frozenset(fixes)
       fixes_label = None
-      if labels.has_key(fixes_s):
-        fixes_label = labels[fixes_s]
+      if args.merge:
+        found = False
+        for j in labels:
+          pass
+
+        if found == False:
+          labels[fixes_s] = fresh_label
+          fresh_label = fresh_label + 1
+
+        for k in labels:
+          pass
+
+        fixes_label = 0
       else:
-        labels[fixes_s] = fresh_label
-        fixes_label = fresh_label
-        fresh_label = fresh_label + 1
-      realpath = args.prefixdir + path.replace(EXTRA_PATH % (args.name, args.name), "")
-      truths["labels"].append((realpath, fixes_label))
+        if labels.has_key(fixes_s):
+          fixes_label = labels[fixes_s]
+        else:
+          labels[fixes_s] = fresh_label
+          fixes_label = fresh_label
+          fresh_label = fresh_label + 1
+        realpath = args.prefixdir + path.replace(EXTRA_PATH % (args.name, args.name), "")
+        truths["labels"].append((realpath, fixes_label))
 
   output = open(args.outputfile, 'w')
   json.dump(truths, output)
   output.close()
   return 0
+
+# In this case, the data formatting is a little different. 
+# We need to take a base dir for where the crashers are, and a 
+# base dir for where the ground truth data is. 
+def benji_data(args):
+  # Base dir where the ground truth .txt files are. 
+  groundtruth_base_dir = args.groundtruth
+  # Base dir where all the crashing files are. 
+  crashers_dir = args.prefixdir 
+
+  truths = {}
+  truths["name"] = args.name
+  truths["labels"] = []
+  cluster_id = 0
+
+  for c in glob.glob(groundtruth_base_dir+"/*.txt"):
+    # Ignore the crash_list entry.
+    if os.path.basename(c) == "crash_list.txt":
+      continue
+  
+    buf = open(c, 'r').read()
+    crashers = [ i for i in buf.split("\n") if len(i) > 0 ]
+    for f in crashers:
+      realpath = crashers_dir + f
+      truths["labels"].append((realpath, cluster_id))
+    cluster_id = cluster_id + 1
+  
+  output = open(args.outputfile, 'w')
+  json.dump(truths, output)
+  output.close()
+  return 0
+
+def main(args):
+  if args.data_source == 'ed':
+    return ed_data(args)
+  elif args.data_source == 'benji':
+    return benji_data(args)
+  return 1
+
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser("csvtool")
@@ -52,5 +107,7 @@ if __name__ == '__main__':
   parser.add_argument("groundtruth")
   parser.add_argument("outputfile")
   parser.add_argument("prefixdir")
+  parser.add_argument("--merge", default=False, action="store_true")
+  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji'])
   args = parser.parse_args()
   sys.exit(main(args))
