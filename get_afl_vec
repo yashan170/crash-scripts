@@ -7,7 +7,7 @@ import json
 import sys
 import os
 
-AFL_COMMAND = 'afl-showmap -t 2000000 -m 15032123396 -q -o %s -- %s %s'
+AFL_COMMAND = 'afl-showmap -t 2000000 -m 15032123396 -q -o %s -- %s%s'
 
 class GetMap(object):
   def __init__(self, p):

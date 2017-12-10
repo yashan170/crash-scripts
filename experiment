@@ -142,7 +142,8 @@ def main(args):
                       None))
 
   print "Generating ground truth data"
-  subprocess.check_call(["./analyze_groundtruth", args.name, args.csv, groundtruth_name, args.datapath])
+  format = "--data-source=%s" % args.data_source
+  subprocess.check_call(["./analyze_groundtruth", format, args.name, args.csv, groundtruth_name, args.datapath])
 
   print "Generating vector extraction commands for AFL"
   of = open(afl_commands_name, 'w')
@@ -219,5 +220,6 @@ if __name__ == '__main__':
   parser.add_argument('datapath', type=str)
   parser.add_argument('program', type=str)
   parser.add_argument('--results', type=str, default="results.csv")
+  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji'])
   args = parser.parse_args()
   sys.exit(main(args))
