@@ -14,66 +14,66 @@ def main(args):
   experiments = []
   experiments.append(("KMeans clustering with AFL", 
                       "kmeans", 
-                      20, 
+                      args.clusters, 
                       "%s-kmeans.json" % args.name, 
                       "kmeans", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name,
                       None))
   experiments.append(("KMeans clustering with PIN", 
                       "kmeans", 
-                      20, 
+                      args.clusters, 
                       "%s-kmeans-itrace.json" % args.name, 
                       "kmeans-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name, 
                       None))
   experiments.append(("KMeans(PCA) clustering with PIN", 
                       "kmeans", 
-                      20, 
+                      args.clusters, 
                       "%s-kmeans-pca-itrace.json" % args.name, 
                       "kmeans-pca-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name, 
                       0.95))
   experiments.append(("KMeans(PCA) clustering with AFL", 
                       "kmeans", 
-                      20, 
+                      args.clusters, 
                       "%s-kmeans-pca" % args.name, 
                       "kmeans-pca", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name, 
                       0.95))
   experiments.append(("Spectral clustering with AFL", 
                       "spectral", 
-                      20, 
+                      args.clusters, 
                       "%s-spectral.json" % args.name, 
                       "spectral", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name,
                       None))
   experiments.append(("Spectral clustering with PIN", 
                       "spectral", 
-                      20, 
+                      args.clusters, 
                       "%s-spectral-itrace.json" % args.name, 
                       "spectral-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name, 
                       None))
   experiments.append(("Spectral(PCA) clustering with PIN", 
                       "spectral", 
-                      20, 
+                      args.clusters, 
                       "%s-spectral-pca-itrace.json" % args.name, 
                       "spectral-pca-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name, 
                       0.95))
   experiments.append(("Spectral(PCA) clustering with AFL", 
                       "spectral", 
-                      20, 
+                      args.clusters, 
                       "%s-spectral-pca" % args.name, 
                       "spectral-pca", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name, 
                       0.95))
   experiments.append(("MeanShift(PCA) clustering with PIN", 
@@ -81,7 +81,7 @@ def main(args):
                       None, 
                       "%s-meanshift-pca-itrace.json" % args.name, 
                       "meanshift-pca-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name,
                       0.95))
   experiments.append(("MeanShift(PCA) clustering with AFL", 
@@ -89,7 +89,7 @@ def main(args):
                       None, 
                       "%s-meanshift-pca.json" % args.name, 
                       "meanshift-pca", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name, 
                       0.95))
   experiments.append(("MeanShift clustering with PIN", 
@@ -97,7 +97,7 @@ def main(args):
                       None, 
                       "%s-meanshift-itrace.json" % args.name, 
                       "meanshift-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name,
                       None))
   experiments.append(("MeanShift clustering with AFL", 
@@ -105,23 +105,23 @@ def main(args):
                       None, 
                       "%s-meanshift.json" % args.name, 
                       "meanshift", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name,
                       None))
   experiments.append(("Aggregate clustering with PIN", 
                       "agg", 
-                      20, 
+                      args.clusters, 
                       "%s-agg-itrace.json" % args.name, 
                       "agg-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name,
                       None))
   experiments.append(("Aggregate clustering with AFL", 
                       "agg", 
-                      20, 
+                      args.clusters, 
                       "%s-agg.json" % args.name, 
                       "agg", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name, 
                       None))
   experiments.append(("DBSCAN clustering with PIN", 
@@ -129,7 +129,7 @@ def main(args):
                       None, 
                       "%s-dbscan-itrace.json" % args.name, 
                       "dbscan-itrace", 
-                      0.9, 
+                      args.variance, 
                       itrace_vectors_name, 
                       None))
   experiments.append(("DBSCAN clustering with AFL", 
@@ -137,12 +137,13 @@ def main(args):
                       None, 
                       "%s-dbscan.json" % args.name, 
                       "dbscan", 
-                      0.9, 
+                      args.variance, 
                       afl_vectors_name, 
                       None))
 
   print "Generating ground truth data"
-  subprocess.check_call(["./analyze_groundtruth", args.name, args.csv, groundtruth_name, args.datapath])
+  format = "--data-source=%s" % args.data_source
+  subprocess.check_call(["./analyze_groundtruth", format, args.name, args.csv, groundtruth_name, args.datapath])
 
   print "Generating vector extraction commands for AFL"
   of = open(afl_commands_name, 'w')
@@ -183,7 +184,8 @@ def main(args):
       cmd.append("--clusters=%d" % clusters)
     cmd.append("--outfile=%s" % outfile)
     cmd.append("--name=%s" % elabel)
-    cmd.append("--variance-threshold=%.2f" % cutoff)
+    if cutoff:
+      cmd.append("--variance-threshold=%.2f" % cutoff)
     if pca:
       cmd.append("--pca=%.2f" % pca)
     cmd.append(tracedir)
@@ -219,5 +221,8 @@ if __name__ == '__main__':
   parser.add_argument('datapath', type=str)
   parser.add_argument('program', type=str)
   parser.add_argument('--results', type=str, default="results.csv")
+  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji'])
+  parser.add_argument('--variance', default=None)
+  parser.add_argument('--clusters', type=int, default=3)
   args = parser.parse_args()
   sys.exit(main(args))

@@ -6,8 +6,10 @@ CSV=$1
 NAME=$2
 DATAPATH=$3
 PROGRAM=$4
+FORMAT=$5
+CLUSTERS=$6
 
 pushd .
 cd $DIR
-./experiment $CSV $NAME $DATAPATH "$PROGRAM"
+./experiment $CSV $NAME $DATAPATH "$PROGRAM" --data-source=$FORMAT --clusters=$CLUSTERS
 popd
