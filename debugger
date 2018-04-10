@@ -1,4 +1,6 @@
 #!/bin/bash
 export ASAN_OPTIONS=symbolize=false,log_path=stdout
 LSAN_OPTIONS=verbosity=1:log_threads=1
-lldb --batch -o "settings set target.input-path $1" -o 'settings set frame-format "# ${frame.pc} \n"' -o 'run' -k 'thread backtrace all' -k 'quit' $2
+lldb --batch -o "settings set target.input-path $1" -o 'settings set frame-format "# ${line.file.fullpath}:${line.number} \n"' -o 'run' -k 'thread backtrace all' -k 'quit' $2
+#lldb --batch -o 'settings set frame-format "# ${frame.pc} \n"' -o 'run' -k 'thread backtrace all' -k 'quit' -- $2 $1
+#lldb --batch -o 'settings set frame-format "# ${line.file.fullpath}:${line.number} \n"' -o 'run' -k 'thread backtrace all' -k 'quit' -- $2 $1

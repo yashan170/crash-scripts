@@ -5,16 +5,10 @@ import json
 import sys
 import os
 
-LLDB_COMMAND = "./debugger %s %s"
-
-class GetStack(object):
-  def __init__(self, p):
-    self.p = p
-  def __call__(self, x):
-    return (x,subprocess.check_output(LLDB_COMMAND % (x, self.p), shell=True))
+LLDB_COMMAND = os.path.dirname(os.path.realpath(__file__))+"/debugger %s \"%s\""
 
 def main(args):
-  infile,m = GetStack(args.program)(args.file)
+  infile,m = (args.file,subprocess.check_output(LLDB_COMMAND % (args.file, args.program), shell=True))
   newstack = []
   b = m.split("\n")
   start1 = False
