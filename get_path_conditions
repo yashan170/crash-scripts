@@ -2,6 +2,15 @@
 from argparse import ArgumentParser
 import sys
 
+def get_path_condition(input_description, program, args):
+    # First, produce a ktest for this program and input description.
+    # Store that ktest in a persistent file. 
+
+    # Figure out which parts of the environment we are making symbolic,
+    # and at what sizes. 
+
+    # Then, run klee on that ktest file. 
+
 def main(args):
     return 0
 
