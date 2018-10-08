@@ -93,11 +93,39 @@ def benji_data(args):
   output.close()
   return 0
 
+def andrew_data(args):
+  q = open(args.groundtruth, 'r')
+  qr = csv.reader(q)
+  qr.next()
+
+  truths = {}
+  truths["name"] = args.name
+  truths["labels"] = []
+  cluster_map = {}
+  fresh_cluster_id = 0
+  skip = set(["2015-11-17 06:37:14", "unfixed"])
+ 
+  for (inputfile,classname) in qr:
+    if classname in skip:
+      continue
+    if classname not in cluster_map.keys():
+      cluster_map[classname] = fresh_cluster_id
+      fresh_cluster_id = fresh_cluster_id + 1
+    truths["labels"].append((inputfile, cluster_map[classname]))
+  
+  output = open(args.outputfile, 'w')
+  json.dump(truths, output)
+  output.close()
+  return 0
+
+
 def main(args):
   if args.data_source == 'ed':
     return ed_data(args)
   elif args.data_source == 'benji':
     return benji_data(args)
+  elif args.data_source == 'andrew':
+    return andrew_data(args)
   return 1
 
 
@@ -108,6 +136,6 @@ if __name__ == '__main__':
   parser.add_argument("outputfile")
   parser.add_argument("prefixdir")
   parser.add_argument("--merge", default=False, action="store_true")
-  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji'])
+  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji', 'andrew'])
   args = parser.parse_args()
   sys.exit(main(args))

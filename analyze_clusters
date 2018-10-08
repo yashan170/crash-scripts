@@ -9,12 +9,23 @@ import sys
 
 def mk_vectors(A, B):
 # make A and B into maps.
+  Aks = set()
+  Bks = set()
+  for (elem,q) in A:
+    Aks.add(elem)
+  for (elem,q) in B:
+    Bks.add(elem)
+
+  A_B = Aks.intersection(Bks)
+
   Amap = {}
   for (elem,label) in A:
-    Amap[elem] = label
+    if elem in A_B:
+      Amap[elem] = label
   Bmap = {}
   for (elem,label) in B:
-    Bmap[elem] = label
+    if elem in A_B:
+      Bmap[elem] = label
 
 # Put the labels into the vectors with the same
 # ordering. Now, the ith entry in Afvec/Bfvec corresponds
@@ -26,6 +37,8 @@ def mk_vectors(A, B):
     Afvec.append(Amap[i])
     Bfvec.append(Bmap[i])
 
+  print len(Afvec)
+  print len(Bfvec)
   return (Afvec,Bfvec)
 
 def mk_sets(A, B):
