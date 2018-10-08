@@ -6,6 +6,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import MeanShift
 from sklearn.metrics.pairwise import cosine_similarity 
+from scipy.sparse import csr_matrix
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.decomposition import PCA
 from multiprocessing import Pool
@@ -77,15 +78,19 @@ def cluster_spectral(args, index_to_file, vecs, sel=None):
     after_dim = na.shape
     print "PCA reduced dimensionality from %s to %s" % (str(before_dim), str(after_dim))
 
-  nb = cosine_similarity(na)
-  nc = np.exp(-nb / nb.std())
+  na = cosine_similarity(na)
+  na = np.exp(-na / na.std())
   spec = SpectralClustering(n_clusters=args.clusters, n_jobs=-1, affinity='precomputed')
-  r = spec.fit(nc)
+  r = spec.fit(na)
 
   return cluster_mk_results(args, r, index_to_file)
 
 def loadfile(f):
-  l = json.load(open(f, 'r'))
+  try:
+    l = json.load(open(f, 'r'))
+  except ValueError:
+    print "Could not read {}".format(f)
+    return (None,None)
   return (l['file'], l['tuples'])
 
 def alignmap(inmap, total_key_set):
@@ -103,7 +108,7 @@ def createvec(inmap, total_keys):
   return (fname,vec)
 
 def main(args):
-  p = Pool()
+  p = Pool(1)
   # Read in all the vector files as dictionaries. 
   print "reading in files" 
   files = []

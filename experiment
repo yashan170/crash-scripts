@@ -20,26 +20,26 @@ def main(args):
                       args.variance, 
                       afl_vectors_name,
                       None))
-  experiments.append(("KMeans clustering with PIN", 
-                      "kmeans", 
-                      args.clusters, 
-                      "%s-kmeans-itrace.json" % args.name, 
-                      "kmeans-itrace", 
-                      args.variance, 
-                      itrace_vectors_name, 
-                      None))
-  experiments.append(("KMeans(PCA) clustering with PIN", 
-                      "kmeans", 
-                      args.clusters, 
-                      "%s-kmeans-pca-itrace.json" % args.name, 
-                      "kmeans-pca-itrace", 
-                      args.variance, 
-                      itrace_vectors_name, 
-                      0.95))
+  #experiments.append(("KMeans clustering with PIN", 
+  #                    "kmeans", 
+  #                    args.clusters, 
+  #                    "%s-kmeans-itrace.json" % args.name, 
+  #                    "kmeans-itrace", 
+  #                    args.variance, 
+  #                    itrace_vectors_name, 
+  #                    None))
+  #experiments.append(("KMeans(PCA) clustering with PIN", 
+  #                    "kmeans", 
+  #                    args.clusters, 
+  #                    "%s-kmeans-pca-itrace.json" % args.name, 
+  #                    "kmeans-pca-itrace", 
+  #                    args.variance, 
+  #                    itrace_vectors_name, 
+  #                    0.95))
   experiments.append(("KMeans(PCA) clustering with AFL", 
                       "kmeans", 
                       args.clusters, 
-                      "%s-kmeans-pca" % args.name, 
+                      "%s-kmeans-pca.json" % args.name, 
                       "kmeans-pca", 
                       args.variance, 
                       afl_vectors_name, 
@@ -52,6 +52,7 @@ def main(args):
                       args.variance, 
                       afl_vectors_name,
                       None))
+  """
   experiments.append(("Spectral clustering with PIN", 
                       "spectral", 
                       args.clusters, 
@@ -68,14 +69,16 @@ def main(args):
                       args.variance, 
                       itrace_vectors_name, 
                       0.95))
+  """
   experiments.append(("Spectral(PCA) clustering with AFL", 
                       "spectral", 
                       args.clusters, 
-                      "%s-spectral-pca" % args.name, 
+                      "%s-spectral-pca.json" % args.name, 
                       "spectral-pca", 
                       args.variance, 
                       afl_vectors_name, 
                       0.95))
+  """
   experiments.append(("MeanShift(PCA) clustering with PIN", 
                       "meanshift", 
                       None, 
@@ -84,6 +87,7 @@ def main(args):
                       args.variance, 
                       itrace_vectors_name,
                       0.95))
+  """
   experiments.append(("MeanShift(PCA) clustering with AFL", 
                       "meanshift", 
                       None, 
@@ -92,6 +96,7 @@ def main(args):
                       args.variance, 
                       afl_vectors_name, 
                       0.95))
+  """
   experiments.append(("MeanShift clustering with PIN", 
                       "meanshift", 
                       None, 
@@ -100,6 +105,7 @@ def main(args):
                       args.variance, 
                       itrace_vectors_name,
                       None))
+  """
   experiments.append(("MeanShift clustering with AFL", 
                       "meanshift", 
                       None, 
@@ -116,6 +122,7 @@ def main(args):
                       args.variance, 
                       itrace_vectors_name,
                       None))
+  """
   experiments.append(("Aggregate clustering with AFL", 
                       "agg", 
                       args.clusters, 
@@ -123,7 +130,7 @@ def main(args):
                       "agg", 
                       args.variance, 
                       afl_vectors_name, 
-                      None))
+                      0.95))
   experiments.append(("DBSCAN clustering with PIN", 
                       "dbscan", 
                       None, 
@@ -132,6 +139,7 @@ def main(args):
                       args.variance, 
                       itrace_vectors_name, 
                       None))
+  """
   experiments.append(("DBSCAN clustering with AFL", 
                       "dbscan", 
                       None, 
@@ -145,35 +153,35 @@ def main(args):
   format = "--data-source=%s" % args.data_source
   subprocess.check_call(["./analyze_groundtruth", format, args.name, args.csv, groundtruth_name, args.datapath])
 
-  print "Generating vector extraction commands for AFL"
-  of = open(afl_commands_name, 'w')
-  subprocess.check_call(["./mk_command", "./get_afl_vec \"%s\"" % args.program, groundtruth_name, afl_vectors_name], stdout=of)
-  of.close()
+  #print "Generating vector extraction commands for AFL"
+  #of = open(afl_commands_name, 'w')
+  #subprocess.check_call(["./mk_command", "./get_afl_vec \"%s\"" % args.program, groundtruth_name, afl_vectors_name], stdout=of)
+  #of.close()
 
-  print "Generating vector extraction commands for PIN"
-  of = open(itrace_commands_name, 'w')
-  subprocess.check_call(["./mk_command", "./get_itrace_vec \"%s\"" % args.program, groundtruth_name, itrace_vectors_name], stdout=of)
-  of.close()
+  #print "Generating vector extraction commands for PIN"
+  #of = open(itrace_commands_name, 'w')
+  #subprocess.check_call(["./mk_command", "./get_itrace_vec \"%s\"" % args.program, groundtruth_name, itrace_vectors_name], stdout=of)
+  #of.close()
 
-  try:
-    os.mkdir(afl_vectors_name)
-  except:
-    pass
+  #try:
+  #  os.mkdir(afl_vectors_name)
+  #except:
+  #  pass
 
-  try:
-    os.mkdir(itrace_vectors_name)
-  except:
-    pass
+  #try:
+  #  os.mkdir(itrace_vectors_name)
+  #except:
+  #  pass
 
-  print "Extracting vectors for AFL"
-  inf = open(afl_commands_name, 'r')
-  subprocess.check_call(["parallel"], stdin=inf)
-  inf.close() 
+  #print "Extracting vectors for AFL"
+  #inf = open(afl_commands_name, 'r')
+  #subprocess.check_call(["parallel"], stdin=inf)
+  #inf.close() 
 
-  print "Extracting vectors for PIN"
-  inf = open(itrace_commands_name, 'r')
-  subprocess.check_call(["parallel"], stdin=inf)
-  inf.close()
+  #print "Extracting vectors for PIN"
+  #inf = open(itrace_commands_name, 'r')
+  #subprocess.check_call(["parallel"], stdin=inf)
+  #inf.close()
 
 # Do experiments.
   for (ename,cmeth,clusters,outfile,elabel,cutoff,tracedir,pca) in experiments:
@@ -221,8 +229,8 @@ if __name__ == '__main__':
   parser.add_argument('datapath', type=str)
   parser.add_argument('program', type=str)
   parser.add_argument('--results', type=str, default="results.csv")
-  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji'])
-  parser.add_argument('--variance', default=None)
+  parser.add_argument('--data-source', type=str, default='ed', choices=['ed', 'benji', 'andrew'])
+  parser.add_argument('--variance', type=float, default=None)
   parser.add_argument('--clusters', type=int, default=3)
   args = parser.parse_args()
   sys.exit(main(args))

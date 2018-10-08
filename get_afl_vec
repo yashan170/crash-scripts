@@ -7,7 +7,7 @@ import json
 import sys
 import os
 
-AFL_COMMAND = 'afl-showmap -t 2000000 -m 15032123396 -q -o %s -- %s%s'
+AFL_COMMAND = 'afl-showmap -q -t 2000000 -m 15032123396 -o %s -- %s < %s'
 
 class GetMap(object):
   def __init__(self, p):
@@ -16,15 +16,15 @@ class GetMap(object):
     f = tempfile.NamedTemporaryFile(delete=False)
     nm = f.name
     f.close()
-    subprocess.call(AFL_COMMAND % (nm, self.p, x), shell=True)
+    rv = subprocess.call(AFL_COMMAND % (nm, self.p, x), shell=True)
     u = open(nm, 'r')
     buf = u.read()
     u.close()
     os.remove(nm)
-    return (x,buf)
+    return (x,buf,rv)
 
 def main(args):
-  infile,m = GetMap(args.program)(args.file)
+  infile,m,rv = GetMap(args.program)(args.file)
   maps_as_dicts = []
   dmap = {}
   for l in m.split("\n"):
@@ -32,6 +32,7 @@ def main(args):
     if len(lu) > 0:
       a,b = lu.split(":")
       dmap[str(a)] = int(b)
+  dmap['xxxxx'] = rv
   umap = {}
   umap['file'] = args.file
   umap['tuples'] = dmap
